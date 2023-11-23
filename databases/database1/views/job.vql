@@ -1,0 +1,57 @@
+﻿# REQUIRES-PROPERTIES-FILE - # Do not remove this comment!
+CREATE OR REPLACE WRAPPER JDBC job
+    DATASOURCENAME=airflow_gp
+    SCHEMANAME='${databases.database1.views.jdbc.job.SCHEMANAME}' ESCAPE
+    RELATIONNAME='job' 
+    OUTPUTSCHEMA (
+        id = 'id' :'java.lang.Integer' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='10', sourcetypeid='4', sourcetypename='serial')  NOT NULL SORTABLE IS_AUTOINCREMENT,
+        dag_id = 'dag_id' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='250', sourcetypeid='12', sourcetypename='varchar')  SORTABLE,
+        state = 'state' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='20', sourcetypeid='12', sourcetypename='varchar')  SORTABLE,
+        job_type = 'job_type' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='30', sourcetypeid='12', sourcetypename='varchar')  SORTABLE,
+        start_date = 'start_date' :'java.time.OffsetDateTime' (OPT) (sourcetypedecimals='6', sourcetyperadix='10', sourcetypesize='35', sourcetypeid='93', sourcetypename='timestamptz')  SORTABLE,
+        end_date = 'end_date' :'java.time.OffsetDateTime' (OPT) (sourcetypedecimals='6', sourcetyperadix='10', sourcetypesize='35', sourcetypeid='93', sourcetypename='timestamptz')  SORTABLE,
+        latest_heartbeat = 'latest_heartbeat' :'java.time.OffsetDateTime' (OPT) (sourcetypedecimals='6', sourcetyperadix='10', sourcetypesize='35', sourcetypeid='93', sourcetypename='timestamptz')  SORTABLE,
+        executor_class = 'executor_class' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='500', sourcetypeid='12', sourcetypename='varchar')  SORTABLE,
+        hostname = 'hostname' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='500', sourcetypeid='12', sourcetypename='varchar')  SORTABLE,
+        unixname = 'unixname' :'java.lang.String' (OPT) (sourcetypedecimals='0', sourcetyperadix='10', sourcetypesize='1000', sourcetypeid='12', sourcetypename='varchar')  SORTABLE
+    )
+    CONSTRAINT 'job_pkey' PRIMARY KEY ( 'id' )
+    INDEX 'job_pkey' OTHER UNIQUE PRIMARY ( 'id' )
+    INDEX 'idx_job_dag_id' OTHER ( 'dag_id' )
+    INDEX 'idx_job_state_heartbeat' OTHER ( 'state' , 'latest_heartbeat' )
+    INDEX 'job_type_heart' OTHER ( 'job_type' , 'latest_heartbeat' );
+
+CREATE OR REPLACE TABLE job I18N us_est (
+        id:int (notnull, autoincrement, sourcetypeid = '4', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '10'),
+        dag_id:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '250'),
+        state:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '20'),
+        job_type:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '30'),
+        start_date:timestamptz (sourcetypeid = '2014', sourcetyperadix = '10', sourcetypedecimals = '6', sourcetypesize = '35'),
+        end_date:timestamptz (sourcetypeid = '2014', sourcetyperadix = '10', sourcetypedecimals = '6', sourcetypesize = '35'),
+        latest_heartbeat:timestamptz (sourcetypeid = '2014', sourcetyperadix = '10', sourcetypedecimals = '6', sourcetypesize = '35'),
+        executor_class:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '500'),
+        hostname:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '500'),
+        unixname:text (sourcetypeid = '12', sourcetyperadix = '10', sourcetypedecimals = '0', sourcetypesize = '1000')
+    )
+    CONSTRAINT 'job_pkey' PRIMARY KEY ( 'id' )
+    CACHE OFF
+    TIMETOLIVEINCACHE DEFAULT
+    ADD SEARCHMETHOD job(
+        I18N us_est
+        CONSTRAINTS (
+             ADD id (any) OPT ANY
+             ADD dag_id (any) OPT ANY
+             ADD state (any) OPT ANY
+             ADD job_type (any) OPT ANY
+             ADD start_date (any) OPT ANY
+             ADD end_date (any) OPT ANY
+             ADD latest_heartbeat (any) OPT ANY
+             ADD executor_class (any) OPT ANY
+             ADD hostname (any) OPT ANY
+             ADD unixname (any) OPT ANY
+        )
+        OUTPUTLIST (dag_id, end_date, executor_class, hostname, id, job_type, latest_heartbeat, start_date, state, unixname
+        )
+        WRAPPER (jdbc job)
+    );
+

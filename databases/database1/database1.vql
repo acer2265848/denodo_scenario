@@ -1,0 +1,5 @@
+﻿CREATE OR REPLACE DATABASE database1 'Database1 Description';
+
+ALTER DATABASE database1
+  CHARSET DEFAULT;
+
